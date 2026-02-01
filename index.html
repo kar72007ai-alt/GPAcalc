@@ -1,247 +1,213 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>GPA Calc</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<title>GPA Calc</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    :root {
-      --bg: #f4f6f8;
-      --card: #ffffff;
-      --text: #222;
-      --primary: #3b82f6;
-      --green: #22c55e;
-      --yellow: #eab308;
-      --red: #ef4444;
-      --dark-bg: #0f172a;
-      --dark-card: #1e293b;
-      --dark-text: #f8fafc;
-    }
+<style>
+:root {
+  --bg:#f4f6f8;
+  --card:#fff;
+  --blue:#3b82f6;
+  --green:#22c55e;
+  --gray:#6b7280;
+  --dark:#0f172a;
+}
 
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont;
-      background: var(--bg);
-      color: var(--text);
-      transition: 0.3s;
-    }
+body{
+  font-family:Arial,sans-serif;
+  background:var(--bg);
+  padding:20px;
+  margin:0;
+}
+body.dark{background:#020617;color:white}
 
-    body.dark {
-      background: var(--dark-bg);
-      color: var(--dark-text);
-    }
+h1{text-align:center;margin-bottom:20px}
 
-    h1 {
-      text-align: center;
-      margin: 30px 0;
-    }
+.card{
+  max-width:800px;
+  margin:auto;
+  background:var(--card);
+  padding:20px;
+  border-radius:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,.1);
+}
+body.dark .card{background:var(--dark)}
 
-    .container {
-      max-width: 700px;
-      margin: auto;
-      padding: 15px;
-    }
+.course-inputs{
+  display:none;
+  flex-direction:row;   /* 🔧 مهم */
+  gap:10px;
+  margin-bottom:12px;
+}
 
-    .card {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
-      transition: 0.3s;
-    }
+.course-inputs select{
+  flex:1;
+  padding:12px;
+  font-size:16px;
+  border-radius:10px;
+}
 
-    body.dark .card {
-      background: var(--dark-card);
-    }
+button{
+  padding:14px;
+  font-size:16px;
+  border:none;
+  border-radius:12px;
+  font-weight:bold;
+  cursor:pointer;
+}
 
-    .course {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-      align-items: center;
-    }
+.save{background:var(--blue);color:white;width:100%}
+.add{background:var(--green);color:white}
+.calc{background:var(--blue);color:white}
+.reset{background:var(--gray);color:white}
+.darkbtn{background:#020617;color:white}
 
-    select {
-      flex: 1;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      font-size: 15px;
-    }
+.buttons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:15px;
+}
 
-    button {
-      padding: 12px;
-      border-radius: 12px;
-      border: none;
-      font-size: 15px;
-      cursor: pointer;
-      color: white;
-    }
+.courses{margin-top:15px}
+.course{
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+  background:#e5e7eb;
+  border-radius:10px;
+  margin-bottom:8px;
+}
+body.dark .course{background:#1e293b}
 
-    .btn-add { background: var(--green); }
-    .btn-calc { background: var(--primary); }
-    .btn-reset { background: #6b7280; }
-    .btn-dark { background: #020617; }
-
-    .buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .result {
-      text-align: center;
-      font-size: 22px;
-      font-weight: bold;
-    }
-
-    .gpa-number {
-      font-size: 40px;
-      display: block;
-      margin-top: 10px;
-    }
-
-    .good { color: var(--green); }
-    .mid { color: var(--yellow); }
-    .bad { color: var(--red); }
-
-    .alert {
-      color: var(--red);
-      text-align: center;
-      margin-bottom: 10px;
-      display: none;
-    }
-
-    @media (max-width: 600px) {
-      .course { flex-direction: column; }
-    }
-  </style>
+.result{
+  display:none;
+  margin-top:25px;
+  text-align:center;
+  font-weight:bold;
+}
+.result span{font-size:42px;display:block;margin-top:8px}
+.good{color:#22c55e}
+.mid{color:#facc15}
+.bad{color:#ef4444}
+</style>
 </head>
 
 <body>
-  <h1>📘 GPA Calc</h1>
 
-  <div class="container">
-    <div class="card">
-      <div id="alert" class="alert">⚠️ Please add at least one course</div>
-      <div id="courses"></div>
-    </div>
+<h1>📘 GPA Calculator</h1>
 
-    <div class="buttons">
-      <button class="btn-add" onclick="addCourse()">➕ Add Course</button>
-      <button class="btn-calc" onclick="calculateGPA()">📊 Calculate</button>
-      <button class="btn-reset" onclick="resetAll()">🔄 Reset</button>
-      <button class="btn-dark" onclick="toggleDark()">🌙 Dark Mode</button>
-    </div>
+<div class="card">
 
-    <div class="card result" id="result">
-      GPA
-      <span class="gpa-number">0.00</span>
-    </div>
+  <!-- Inputs -->
+  <div class="course-inputs" id="inputs">
+    <select id="grade">
+      <option value="">Grade</option>
+      <option>A</option><option>A-</option>
+      <option>B</option><option>B-</option>
+      <option>C</option><option>C-</option>
+      <option>D</option><option>F</option>
+    </select>
+
+    <select id="hours">
+      <option value="">Hours</option>
+      <option>1</option><option>2</option><option>3</option>
+      <option>4</option><option>5</option><option>6</option>
+    </select>
   </div>
 
-  <script>
-    let courses = JSON.parse(localStorage.getItem("courses")) || [];
-    let dark = localStorage.getItem("dark") === "true";
+  <button class="save" onclick="saveCourse()">✔ Save Course</button>
 
-    if (dark) document.body.classList.add("dark");
+  <div class="courses" id="courses"></div>
 
-    function addCourse() {
-      courses.push({ grade: "", hours: "" });
-      save();
-      render();
-    }
+  <div class="buttons">
+    <button class="add" onclick="showInputs()">➕ Add Course</button>
+    <button class="calc" onclick="calculateGPA()">📊 Calculate</button>
+    <button class="reset" onclick="resetAll()">🔄 Reset</button>
+    <button class="darkbtn" onclick="toggleDark()">🌙 Dark</button>
+  </div>
 
-    function removeCourse(i) {
-      courses.splice(i, 1);
-      save();
-      render();
-    }
+  <div class="result" id="result"></div>
+</div>
 
-    function render() {
-      const box = document.getElementById("courses");
-      box.innerHTML = "";
+<script>
+const points={
+ A:4,"A-":3.67,B:3.33,"B-":3,
+ C:2.67,"C-":2.33,D:2,F:0
+};
 
-      courses.forEach((c, i) => {
-        box.innerHTML += `
-          <div class="course">
-            <select onchange="courses[${i}].grade=this.value; save()">
-              <option value="">Grade</option>
-              <option>A</option><option>A-</option>
-              <option>B+</option><option>B</option>
-              <option>B-</option><option>C+</option>
-              <option>C</option><option>D</option>
-              <option>F</option>
-            </select>
+let courses=JSON.parse(localStorage.getItem("courses"))||[];
 
-            <select onchange="courses[${i}].hours=this.value; save()">
-              <option value="">Hours</option>
-              <option>1</option><option>2</option>
-              <option>3</option><option>4</option>
-            </select>
+function showInputs(){
+ document.getElementById("inputs").style.display="flex";
+}
 
-            <button onclick="removeCourse(${i})">🗑</button>
-          </div>
-        `;
-      });
-    }
+function saveCourse(){
+ const g=document.getElementById("grade");
+ const h=document.getElementById("hours");
 
-    function calculateGPA() {
-      if (courses.length === 0) {
-        document.getElementById("alert").style.display = "block";
-        return;
-      }
+ if(!g.value||!h.value){
+   alert("Please select grade and hours");
+   return;
+ }
 
-      document.getElementById("alert").style.display = "none";
+ courses.push({grade:g.value,hours:+h.value});
+ localStorage.setItem("courses",JSON.stringify(courses));
 
-      const map = {
-        "A":4,"A-":3.7,"B+":3.3,"B":3,
-        "B-":2.7,"C+":2.3,"C":2,
-        "D":1,"F":0
-      };
+ g.value="";
+ h.value="";
 
-      let total = 0, hours = 0;
+ renderCourses();
+}
 
-      courses.forEach(c => {
-        if (c.grade && c.hours) {
-          total += map[c.grade] * c.hours;
-          hours += Number(c.hours);
-        }
-      });
+function renderCourses(){
+ const box=document.getElementById("courses");
+ box.innerHTML="";
+ courses.forEach((c,i)=>{
+   box.innerHTML+=`
+    <div class="course">
+      ${c.grade} × ${c.hours} hours
+      <button onclick="removeCourse(${i})">🗑</button>
+    </div>`;
+ });
+}
 
-      const gpa = hours ? (total / hours).toFixed(2) : "0.00";
-      const result = document.getElementById("result");
-      const num = result.querySelector(".gpa-number");
+function removeCourse(i){
+ courses.splice(i,1);
+ localStorage.setItem("courses",JSON.stringify(courses));
+ renderCourses();
+}
 
-      num.textContent = gpa;
-      result.classList.remove("good","mid","bad");
+function calculateGPA(){
+ if(!courses.length){alert("Add courses first");return;}
+ let p=0,h=0;
+ courses.forEach(c=>{
+  p+=points[c.grade]*c.hours;
+  h+=c.hours;
+ });
+ let gpa=(p/h).toFixed(2);
+ const r=document.getElementById("result");
+ r.style.display="block";
+ r.className="result "+(gpa>=3?"good":gpa>=2?"mid":"bad");
+ r.innerHTML=`GPA <span>${gpa}</span>`;
+}
 
-      if (gpa >= 3) result.classList.add("good");
-      else if (gpa >= 2) result.classList.add("mid");
-      else result.classList.add("bad");
+function resetAll(){
+ courses=[];
+ localStorage.clear();
+ document.getElementById("courses").innerHTML="";
+ document.getElementById("inputs").style.display="none";
+ document.getElementById("result").style.display="none";
+}
 
-      localStorage.setItem("gpa", gpa);
-    }
+function toggleDark(){
+ document.body.classList.toggle("dark");
+}
 
-    function resetAll() {
-      courses = [];
-      localStorage.clear();
-      document.querySelector(".gpa-number").textContent = "0.00";
-      render();
-    }
+renderCourses();
+</script>
 
-    function toggleDark() {
-      document.body.classList.toggle("dark");
-      localStorage.setItem("dark", document.body.classList.contains("dark"));
-    }
-
-    function save() {
-      localStorage.setItem("courses", JSON.stringify(courses));
-    }
-
-    render();
-  </script>
 </body>
 </html>
