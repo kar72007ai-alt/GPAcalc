@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <title>GPA Calc</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #222;
+      --primary: #3b82f6;
+      --green: #22c55e;
+      --yellow: #eab308;
+      --red: #ef4444;
+      --dark-bg: #0f172a;
+      --dark-card: #1e293b;
+      --dark-text: #f8fafc;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
+      background: var(--bg);
+      color: var(--text);
+      transition: 0.3s;
+    }
+
+    body.dark {
+      background: var(--dark-bg);
+      color: var(--dark-text);
+    }
+
+    h1 {
+      text-align: center;
+      margin: 30px 0;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      padding: 15px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+      transition: 0.3s;
+    }
+
+    body.dark .card {
+      background: var(--dark-card);
+    }
+
+    .course {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+
+    select {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    button {
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-size: 15px;
+      cursor: pointer;
+      color: white;
+    }
+
+    .btn-add { background: var(--green); }
+    .btn-calc { background: var(--primary); }
+    .btn-reset { background: #6b7280; }
+    .btn-dark { background: #020617; }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .result {
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .gpa-number {
+      font-size: 40px;
+      display: block;
+      margin-top: 10px;
+    }
+
+    .good { color: var(--green); }
+    .mid { color: var(--yellow); }
+    .bad { color: var(--red); }
+
+    .alert {
+      color: var(--red);
+      text-align: center;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      .course { flex-direction: column; }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>📘 GPA Calc</h1>
+
+  <div class="container">
+    <div class="card">
+      <div id="alert" class="alert">⚠️ Please add at least one course</div>
+      <div id="courses"></div>
+    </div>
+
+    <div class="buttons">
+      <button class="btn-add" onclick="addCourse()">➕ Add Course</button>
+      <button class="btn-calc" onclick="calculateGPA()">📊 Calculate</button>
+      <button class="btn-reset" onclick="resetAll()">🔄 Reset</button>
+      <button class="btn-dark" onclick="toggleDark()">🌙 Dark Mode</button>
+    </div>
+
+    <div class="card result" id="result">
+      GPA
+      <span class="gpa-number">0.00</span>
+    </div>
+  </div>
+
+  <script>
+    let courses = JSON.parse(localStorage.getItem("courses")) || [];
+    let dark = localStorage.getItem("dark") === "true";
+
+    if (dark) document.body.classList.add("dark");
+
+    function addCourse() {
+      courses.push({ grade: "", hours: "" });
+      save();
+      render();
+    }
+
+    function removeCourse(i) {
+      courses.splice(i, 1);
+      save();
+      render();
+    }
+
+    function render() {
+      const box = document.getElementById("courses");
+      box.innerHTML = "";
+
+      courses.forEach((c, i) => {
+        box.innerHTML += `
+          <div class="course">
+            <select onchange="courses[${i}].grade=this.value; save()">
+              <option value="">Grade</option>
+              <option>A</option><option>A-</option>
+              <option>B+</option><option>B</option>
+              <option>B-</option><option>C+</option>
+              <option>C</option><option>D</option>
+              <option>F</option>
+            </select>
+
+            <select onchange="courses[${i}].hours=this.value; save()">
+              <option value="">Hours</option>
+              <option>1</option><option>2</option>
+              <option>3</option><option>4</option>
+            </select>
+
+            <button onclick="removeCourse(${i})">🗑</button>
+          </div>
+        `;
+      });
+    }
+
+    function calculateGPA() {
+      if (courses.length === 0) {
+        document.getElementById("alert").style.display = "block";
+        return;
+      }
+
+      document.getElementById("alert").style.display = "none";
+
+      const map = {
+        "A":4,"A-":3.7,"B+":3.3,"B":3,
+        "B-":2.7,"C+":2.3,"C":2,
+        "D":1,"F":0
+      };
+
+      let total = 0, hours = 0;
+
+      courses.forEach(c => {
+        if (c.grade && c.hours) {
+          total += map[c.grade] * c.hours;
+          hours += Number(c.hours);
+        }
+      });
+
+      const gpa = hours ? (total / hours).toFixed(2) : "0.00";
+      const result = document.getElementById("result");
+      const num = result.querySelector(".gpa-number");
+
+      num.textContent = gpa;
+      result.classList.remove("good","mid","bad");
+
+      if (gpa >= 3) result.classList.add("good");
+      else if (gpa >= 2) result.classList.add("mid");
+      else result.classList.add("bad");
+
+      localStorage.setItem("gpa", gpa);
+    }
+
+    function resetAll() {
+      courses = [];
+      localStorage.clear();
+      document.querySelector(".gpa-number").textContent = "0.00";
+      render();
+    }
+
+    function toggleDark() {
+      document.body.classList.toggle("dark");
+      localStorage.setItem("dark", document.body.classList.contains("dark"));
+    }
+
+    function save() {
+      localStorage.setItem("courses", JSON.stringify(courses));
+    }
+
+    render();
+  </script>
+</body>
+</html>
