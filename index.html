@@ -6,6 +6,7 @@
 <title>GPA Calculator</title>
 
 <style>
+
 body{
     font-family: Arial, sans-serif;
     background:#e5e7eb;
@@ -13,47 +14,27 @@ body{
     transition:.3s;
 }
 
-h1{
-    margin-top:20px;
-}
-
 .container{
-    max-width:800px;
-    margin:30px auto;
+    width:900px;
+    margin:40px auto;
 }
-
-.course{
-    display:flex;
-    gap:10px;
-    margin-bottom:15px;
-}
-
-input, select{
-    padding:10px;
-    border-radius:10px;
-    border:1px solid #ccc;
-    flex:1;
-}
-
-/* Buttons Style */
 
 .buttons{
     display:flex;
     justify-content:center;
-    gap:20px;
-    margin:20px 0;
-    flex-wrap:wrap;
+    gap:40px;
+    margin-bottom:60px;
 }
 
 .btn{
-    padding:15px 30px;
+    padding:18px 40px;
     border:none;
     border-radius:40px;
-    font-size:18px;
+    font-size:20px;
     font-weight:bold;
-    cursor:pointer;
     color:white;
-    box-shadow:0 8px 20px rgba(0,0,0,0.15);
+    cursor:pointer;
+    box-shadow:0 15px 30px rgba(0,0,0,.15);
     transition:.3s;
 }
 
@@ -62,22 +43,44 @@ input, select{
 .add-btn{background:#22c55e;}
 .save-btn{background:#3b82f6;}
 
+.btn:hover{
+    transform:translateY(-4px);
+}
+
 .calculate-btn{
-    margin-top:20px;
-    padding:20px 80px;
-    font-size:24px;
-    border-radius:50px;
+    margin-top:80px;
+    padding:28px 120px;
+    font-size:30px;
     border:none;
+    border-radius:60px;
     cursor:pointer;
     color:white;
     background:linear-gradient(90deg,#6366f1,#8b5cf6);
-    box-shadow:0 15px 35px rgba(0,0,0,0.2);
+    box-shadow:0 20px 40px rgba(0,0,0,.2);
     transition:.3s;
 }
 
+.calculate-btn:hover{
+    transform:scale(1.05);
+}
+
+.course{
+    display:flex;
+    gap:15px;
+    margin-bottom:20px;
+    justify-content:center;
+}
+
+input,select{
+    padding:15px;
+    border-radius:12px;
+    border:1px solid #ccc;
+    font-size:16px;
+}
+
 .result{
-    margin-top:30px;
-    font-size:28px;
+    margin-top:40px;
+    font-size:40px;
     font-weight:bold;
 }
 
@@ -93,16 +96,12 @@ input, select{
     color:white;
     border:1px solid #555;
 }
+
 </style>
 </head>
-
 <body>
 
-<h1>GPA Calculation</h1>
-
 <div class="container">
-
-<div id="courses"></div>
 
 <div class="buttons">
 <button class="btn dark-btn" onclick="toggleDark()">🌙 Dark</button>
@@ -110,6 +109,8 @@ input, select{
 <button class="btn add-btn" onclick="addCourse()">➕ Add</button>
 <button class="btn save-btn">✔ Save</button>
 </div>
+
+<div id="courses"></div>
 
 <button class="calculate-btn" onclick="calculateGPA()">📊 Calculate GPA</button>
 
@@ -119,7 +120,7 @@ input, select{
 
 <script>
 
-/* Grade Scale */
+/* Grade Scale EXACTLY like image */
 
 const gradePoints = {
 "A":4,
@@ -130,16 +131,18 @@ const gradePoints = {
 "C+":2.33,
 "C":2,
 "C-":1.67,
-"D":1,
+"D":2,
 "F":0
 };
+
+/* Add Course */
 
 function addCourse(){
     let div=document.createElement("div");
     div.className="course";
 
     div.innerHTML=`
-        <input type="text" placeholder="Course Name">
+        <input type="text" placeholder="Course Name (Optional)">
         <select>
             <option>A</option>
             <option>A-</option>
@@ -152,67 +155,73 @@ function addCourse(){
             <option>D</option>
             <option>F</option>
         </select>
-        <input type="number" placeholder="Credit Hours" min="1">
+        <select>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </select>
     `;
 
     document.getElementById("courses").appendChild(div);
 }
 
-/* Color Based On GPA */
+/* GPA Calculation EXACT formula */
 
-function getColor(gpa){
-    if(gpa>=3.7) return "#16a34a";     // أخضر قوي
-    if(gpa>=3) return "#22c55e";       // أخضر
-    if(gpa>=2) return "#f59e0b";       // برتقالي
-    return "#ef4444";                  // أحمر
+function calculateGPA(){
+
+    let courses=document.querySelectorAll(".course");
+    let totalQualityPoints=0;
+    let totalCreditHours=0;
+
+    courses.forEach(course=>{
+        let grade=course.querySelectorAll("select")[0].value;
+        let credits=parseFloat(course.querySelectorAll("select")[1].value);
+
+        let qualityPoints=gradePoints[grade]*credits;
+
+        totalQualityPoints+=qualityPoints;
+        totalCreditHours+=credits;
+    });
+
+    if(totalCreditHours===0){
+        alert("Add courses first");
+        return;
+    }
+
+    let gpa=totalQualityPoints/totalCreditHours;
+
+    let finalLetter=getLetter(gpa);
+    let color=getColor(gpa);
+
+    let result=document.getElementById("result");
+    result.innerHTML=`${finalLetter}`;
+    result.style.color=color;
 }
 
 /* Letter From GPA */
 
 function getLetter(gpa){
     if(gpa>=3.7) return "A";
-    if(gpa>=3.3) return "B+";
+    if(gpa>=3.33) return "B+";
     if(gpa>=3) return "B";
-    if(gpa>=2.7) return "B-";
-    if(gpa>=2.3) return "C+";
+    if(gpa>=2.67) return "B-";
+    if(gpa>=2.33) return "C+";
     if(gpa>=2) return "C";
-    if(gpa>=1.7) return "C-";
+    if(gpa>=1.67) return "C-";
     if(gpa>=1) return "D";
     return "F";
 }
 
-function calculateGPA(){
+/* Color Based On GPA */
 
-    let courses=document.querySelectorAll(".course");
-    let totalPoints=0;
-    let totalCredits=0;
-
-    courses.forEach(course=>{
-        let grade=course.querySelector("select").value;
-        let credits=parseFloat(course.querySelector("input[type='number']").value);
-
-        if(!credits) return;
-
-        let points=gradePoints[grade]*credits;
-
-        totalPoints+=points;
-        totalCredits+=credits;
-    });
-
-    if(totalCredits===0){
-        alert("Enter courses first");
-        return;
-    }
-
-    let gpa=(totalPoints/totalCredits);
-    let finalGPA=gpa.toFixed(2);
-
-    let letter=getLetter(gpa);
-    let color=getColor(gpa);
-
-    let result=document.getElementById("result");
-    result.innerHTML=`GPA: ${letter}`;
-    result.style.color=color;
+function getColor(gpa){
+    if(gpa>=3.5) return "#16a34a";
+    if(gpa>=3) return "#22c55e";
+    if(gpa>=2) return "#f59e0b";
+    return "#ef4444";
 }
 
 /* Reset */
@@ -227,8 +236,6 @@ function resetAll(){
 function toggleDark(){
     document.body.classList.toggle("dark");
 }
-
-addCourse();
 
 </script>
 
