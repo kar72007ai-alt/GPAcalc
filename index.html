@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GPA Calculator</title>
 
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6366f1">
+
 <style>
 body{
 font-family:Arial, sans-serif;
@@ -40,6 +43,7 @@ button:hover{
 transform:scale(1.05);
 }
 
+.app-btn{background:#6366f1;color:white;}
 .dark-btn{background:#2f3b52;color:white;}
 .reset-btn{background:#ef4444;color:white;}
 .add-btn{background:#22c55e;color:white;}
@@ -119,20 +123,13 @@ margin-top:10px;
 font-size:14px;
 opacity:0.8;
 }
-
-.prev-section{
-margin-top:20px;
-}
-
-.prev-section input{
-width:100px;
-}
 </style>
 </head>
 
 <body>
 
 <div class="top-buttons">
+<button class="app-btn" id="installBtn" style="display:none;">📲 App</button>
 <button class="dark-btn" onclick="toggleDark()">🌙 Dark</button>
 <button class="reset-btn" onclick="resetAll()">🔄 Reset</button>
 <button class="add-btn" onclick="addCourse()">➕ Add</button>
@@ -140,14 +137,6 @@ width:100px;
 </div>
 
 <div id="courses"></div>
-
-<div class="prev-section">
-<button onclick="togglePrev()">➕ Add Previous GPA</button>
-<div id="prevInputs" style="display:none; margin-top:10px;">
-<input type="number" step="0.01" id="prevGPA" placeholder="Previous GPA">
-<input type="number" id="prevCredits" placeholder="Credits">
-</div>
-</div>
 
 <button class="calculate" onclick="calculateGPA()">📊 Calc GPA</button>
 
@@ -158,13 +147,40 @@ width:100px;
 
 let coursesDiv = document.getElementById("courses");
 let addUsed = false;
+let deferredPrompt;
+
+// ===== PWA INSTALL BUTTON =====
+const installBtn = document.getElementById("installBtn");
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = "inline-block";
+});
+
+installBtn.addEventListener("click", async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt = null;
+    installBtn.style.display = "none";
+  } else {
+    alert("On iPhone: Share → Add to Home Screen");
+  }
+});
+
+// ===== SERVICE WORKER =====
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+
+// ===== GPA LOGIC =====
 
 function createRow(){
 let row = document.createElement("div");
 row.className="row editing";
 
 row.innerHTML=`
-<input type="text" placeholder="NAME (Optional)">
+<input type="text" placeholder="Name (Optional)">
 <select>
 <option value="" disabled selected>Grades</option>
 <option value="4">A</option>
@@ -203,18 +219,13 @@ let editingRow = document.querySelector(".editing");
 if(!editingRow) return;
 
 editingRow.classList.remove("editing");
-
-editingRow.querySelectorAll("input,select").forEach(el=>{
-el.disabled = true;
-});
+editingRow.querySelectorAll("input,select").forEach(el=>el.disabled=true);
 
 let editBtn = document.createElement("div");
 editBtn.className="edit-btn";
 editBtn.innerHTML="✏";
 editBtn.onclick=function(){
-editingRow.querySelectorAll("input,select").forEach(el=>{
-el.disabled = false;
-});
+editingRow.querySelectorAll("input,select").forEach(el=>el.disabled=false);
 editingRow.classList.add("editing");
 editBtn.remove();
 };
@@ -224,14 +235,12 @@ createRow();
 }
 
 function calculateGPA(){
-
 let rows=document.querySelectorAll(".row");
 let totalPoints=0;
 let totalCredits=0;
 let courseCount=0;
 
 for(let row of rows){
-
 let selects=row.querySelectorAll("select");
 if(selects.length<2) continue;
 
@@ -248,49 +257,20 @@ totalCredits+=credits;
 courseCount++;
 }
 
-let prevGPA=document.getElementById("prevGPA").value;
-let prevCredits=document.getElementById("prevCredits").value;
-
-if(prevGPA && prevCredits){
-totalPoints+=parseFloat(prevGPA)*parseInt(prevCredits);
-totalCredits+=parseInt(prevCredits);
-}
-
 if(totalCredits===0){
 alert("No courses added.");
 return;
 }
 
 let gpa=(totalPoints/totalCredits).toFixed(2);
-let numericGPA=parseFloat(gpa);
-
-let letter="";
-if(numericGPA >= 3.7) letter="A";
-else if(numericGPA >= 3.33) letter="A-";
-else if(numericGPA >= 3) letter="B";
-else if(numericGPA >= 2.67) letter="B-";
-else if(numericGPA >= 2.33) letter="C";
-else if(numericGPA >= 2) letter="C-";
-else if(numericGPA >= 1) letter="D";
-else letter="F";
-
 let resultDiv=document.getElementById("result");
-resultDiv.innerHTML=`GPA: ${gpa} (${letter})`;
+resultDiv.innerHTML=`GPA: ${gpa}`;
 resultDiv.classList.remove("show");
 void resultDiv.offsetWidth;
 resultDiv.classList.add("show");
 
-if(numericGPA>=3.7) resultDiv.style.color="green";
-else if(numericGPA>=2.33) resultDiv.style.color="orange";
-else resultDiv.style.color="red";
-
 document.getElementById("stats").innerHTML=
 `Total Courses: ${courseCount} | Total Credits: ${totalCredits}`;
-}
-
-function togglePrev(){
-let box=document.getElementById("prevInputs");
-box.style.display = box.style.display==="none" ? "block" : "none";
 }
 
 function toggleDark(){
