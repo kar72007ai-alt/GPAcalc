@@ -1,225 +1,235 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GPA Calculator</title>
 
 <style>
-body {
-    font-family: Arial;
-    background: #eef1f6;
-    padding: 40px;
-    transition: .3s;
+body{
+    font-family: Arial, sans-serif;
+    background:#e5e7eb;
+    text-align:center;
+    transition:.3s;
 }
 
-.dark-mode {
-    background: #0f172a;
-    color: white;
+h1{
+    margin-top:20px;
 }
 
-.container {
-    max-width: 900px;
-    margin: auto;
-    text-align: center;
+.container{
+    max-width:800px;
+    margin:30px auto;
 }
 
-/* Top Buttons */
-.top-buttons {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 30px;
+.course{
+    display:flex;
+    gap:10px;
+    margin-bottom:15px;
 }
 
-button {
-    border: none;
-    padding: 15px 28px;
-    font-size: 16px;
-    border-radius: 40px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: .3s;
-    box-shadow: 0 8px 18px rgba(0,0,0,0.1);
-}
-
-button:hover { transform: translateY(-3px); }
-
-.dark-btn { background:#334155; color:white; }
-.reset-btn { background:#ef4444; color:white; }
-.add-btn { background:#22c55e; color:white; }
-.save-btn { background:#3b82f6; color:white; }
-
-.calc-btn {
-    background: linear-gradient(45deg,#6366f1,#8b5cf6);
-    color:white;
-    width:75%;
-    padding:25px;
-    font-size:22px;
-    margin-top:40px;
-}
-
-/* Inputs */
-.input-area {
-    display:none;
-    margin-bottom:25px;
-}
-
-input, select {
-    padding:12px;
-    margin:8px;
-    border-radius:15px;
+input, select{
+    padding:10px;
+    border-radius:10px;
     border:1px solid #ccc;
+    flex:1;
 }
 
-/* Course List */
-.course-item {
+/* Buttons Style */
+
+.buttons{
     display:flex;
-    justify-content:space-between;
-    align-items:center;
-    background:white;
-    padding:15px 20px;
-    border-radius:20px;
-    margin-bottom:12px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.08);
-}
-
-.dark-mode .course-item {
-    background:#1e293b;
-}
-
-.delete-btn {
-    background:#ef4444;
-    color:white;
-    border-radius:50%;
-    width:38px;
-    height:38px;
-    display:flex;
-    align-items:center;
     justify-content:center;
+    gap:20px;
+    margin:20px 0;
+    flex-wrap:wrap;
+}
+
+.btn{
+    padding:15px 30px;
+    border:none;
+    border-radius:40px;
+    font-size:18px;
+    font-weight:bold;
     cursor:pointer;
+    color:white;
+    box-shadow:0 8px 20px rgba(0,0,0,0.15);
+    transition:.3s;
+}
+
+.dark-btn{background:#374151;}
+.reset-btn{background:#ef4444;}
+.add-btn{background:#22c55e;}
+.save-btn{background:#3b82f6;}
+
+.calculate-btn{
+    margin-top:20px;
+    padding:20px 80px;
+    font-size:24px;
+    border-radius:50px;
+    border:none;
+    cursor:pointer;
+    color:white;
+    background:linear-gradient(90deg,#6366f1,#8b5cf6);
+    box-shadow:0 15px 35px rgba(0,0,0,0.2);
+    transition:.3s;
+}
+
+.result{
+    margin-top:30px;
+    font-size:28px;
+    font-weight:bold;
+}
+
+/* Dark Mode */
+
+.dark{
+    background:#111827;
+    color:white;
+}
+
+.dark input,.dark select{
+    background:#374151;
+    color:white;
+    border:1px solid #555;
 }
 </style>
 </head>
 
 <body>
 
+<h1>GPA Calculation</h1>
+
 <div class="container">
 
-<!-- ORDER: Dark - Reset - Add - Save -->
-<div class="top-buttons">
-    <button class="dark-btn" onclick="toggleDark()">🌙 Dark</button>
-    <button class="reset-btn" onclick="resetAll()">🔄 Reset</button>
-    <button class="add-btn" onclick="showInputs()">➕ Add</button>
-    <button class="save-btn" onclick="saveCourse()">✔ Save</button>
+<div id="courses"></div>
+
+<div class="buttons">
+<button class="btn dark-btn" onclick="toggleDark()">🌙 Dark</button>
+<button class="btn reset-btn" onclick="resetAll()">🔄 Reset</button>
+<button class="btn add-btn" onclick="addCourse()">➕ Add</button>
+<button class="btn save-btn">✔ Save</button>
 </div>
 
-<div class="input-area" id="inputArea">
-    <input type="text" id="courseName" placeholder="Course Name (Optional)">
-    
-    <select id="courseGrade">
-        <option value="">Select Grade</option>
-        <option value="4">A</option>
-        <option value="3.67">A-</option>
-        <option value="3.33">B</option>
-        <option value="3">B-</option>
-        <option value="2.67">C</option>
-        <option value="2.33">C-</option>
-        <option value="2">D</option>
-        <option value="0">F</option>
-    </select>
+<button class="calculate-btn" onclick="calculateGPA()">📊 Calculate GPA</button>
 
-    <select id="courseCredits">
-        <option value="">Credits</option>
-        <option>1</option>
-        <option>2</option>
-        <option>3</option>
-        <option>4</option>
-        <option>5</option>
-        <option>6</option>
-    </select>
-</div>
-
-<div id="courseList"></div>
-
-<button class="calc-btn" onclick="calculateGPA()">📊 Calculate GPA</button>
-
-<h2 id="result"></h2>
+<div class="result" id="result"></div>
 
 </div>
 
 <script>
-let courses=[];
-let shown=false;
 
-function showInputs(){
-    if(!shown){
-        document.getElementById("inputArea").style.display="block";
-        shown=true;
-    }
+/* Grade Scale */
+
+const gradePoints = {
+"A":4,
+"A-":3.67,
+"B+":3.33,
+"B":3,
+"B-":2.67,
+"C+":2.33,
+"C":2,
+"C-":1.67,
+"D":1,
+"F":0
+};
+
+function addCourse(){
+    let div=document.createElement("div");
+    div.className="course";
+
+    div.innerHTML=`
+        <input type="text" placeholder="Course Name">
+        <select>
+            <option>A</option>
+            <option>A-</option>
+            <option>B+</option>
+            <option>B</option>
+            <option>B-</option>
+            <option>C+</option>
+            <option>C</option>
+            <option>C-</option>
+            <option>D</option>
+            <option>F</option>
+        </select>
+        <input type="number" placeholder="Credit Hours" min="1">
+    `;
+
+    document.getElementById("courses").appendChild(div);
 }
 
-function saveCourse(){
-    const name=document.getElementById("courseName").value||"Unnamed";
-    const grade=parseFloat(document.getElementById("courseGrade").value);
-    const credits=parseFloat(document.getElementById("courseCredits").value);
+/* Color Based On GPA */
 
-    if(isNaN(grade)||isNaN(credits)){
-        alert("Select Grade and Credits");
-        return;
-    }
-
-    courses.push({name,grade,credits});
-    displayCourses();
-
-    document.getElementById("courseName").value="";
-    document.getElementById("courseGrade").value="";
-    document.getElementById("courseCredits").value="";
+function getColor(gpa){
+    if(gpa>=3.7) return "#16a34a";     // أخضر قوي
+    if(gpa>=3) return "#22c55e";       // أخضر
+    if(gpa>=2) return "#f59e0b";       // برتقالي
+    return "#ef4444";                  // أحمر
 }
 
-function displayCourses(){
-    const list=document.getElementById("courseList");
-    list.innerHTML="";
+/* Letter From GPA */
 
-    courses.forEach((c,i)=>{
-        list.innerHTML+=`
-        <div class="course-item">
-            ${c.name} | ${c.grade} × ${c.credits}
-            <div class="delete-btn" onclick="deleteCourse(${i})">🗑</div>
-        </div>`;
-    });
-}
-
-function deleteCourse(i){
-    courses.splice(i,1);
-    displayCourses();
+function getLetter(gpa){
+    if(gpa>=3.7) return "A";
+    if(gpa>=3.3) return "B+";
+    if(gpa>=3) return "B";
+    if(gpa>=2.7) return "B-";
+    if(gpa>=2.3) return "C+";
+    if(gpa>=2) return "C";
+    if(gpa>=1.7) return "C-";
+    if(gpa>=1) return "D";
+    return "F";
 }
 
 function calculateGPA(){
+
+    let courses=document.querySelectorAll(".course");
     let totalPoints=0;
     let totalCredits=0;
 
-    courses.forEach(c=>{
-        totalPoints+=c.grade*c.credits;
-        totalCredits+=c.credits;
+    courses.forEach(course=>{
+        let grade=course.querySelector("select").value;
+        let credits=parseFloat(course.querySelector("input[type='number']").value);
+
+        if(!credits) return;
+
+        let points=gradePoints[grade]*credits;
+
+        totalPoints+=points;
+        totalCredits+=credits;
     });
 
     if(totalCredits===0){
-        alert("Add courses first");
+        alert("Enter courses first");
         return;
     }
 
-    let gpa=(totalPoints/totalCredits).toFixed(2);
-    document.getElementById("result").innerText="GPA = "+gpa;
+    let gpa=(totalPoints/totalCredits);
+    let finalGPA=gpa.toFixed(2);
+
+    let letter=getLetter(gpa);
+    let color=getColor(gpa);
+
+    let result=document.getElementById("result");
+    result.innerHTML=`GPA: ${letter}`;
+    result.style.color=color;
 }
+
+/* Reset */
 
 function resetAll(){
-    courses=[];
-    document.getElementById("courseList").innerHTML="";
-    document.getElementById("result").innerText="";
+    document.getElementById("courses").innerHTML="";
+    document.getElementById("result").innerHTML="";
 }
 
+/* Dark Mode */
+
 function toggleDark(){
-    document.body.classList.toggle("dark-mode");
+    document.body.classList.toggle("dark");
 }
+
+addCourse();
+
 </script>
 
 </body>
