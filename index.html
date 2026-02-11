@@ -122,7 +122,7 @@ let addUsed=false;
 
 function togglePrevious(){
 let sec=document.getElementById("previousSection");
-sec.style.display=sec.style.display==="none"?"block":"none";
+sec.style.display = sec.style.display==="none" ? "block" : "none";
 }
 
 function createRow(){
@@ -135,10 +135,10 @@ row.innerHTML=`
 <option value="" disabled selected>Grades</option>
 <option value="4">A</option>
 <option value="3.67">A-</option>
-<option value="3.33">B</option>
-<option value="3">B-</option>
-<option value="2.67">C</option>
-<option value="2.33">C-</option>
+<option value="3.33">B+</option>
+<option value="3">B</option>
+<option value="2.67">C+</option>
+<option value="2.33">C</option>
 <option value="2">D</option>
 <option value="0">F</option>
 </select>
@@ -193,7 +193,7 @@ let selects=row.querySelectorAll("select");
 if(selects.length<2) continue;
 
 if(selects[0].value==="" || selects[1].value===""){
-alert("Complete all Grades and Credits.");
+alert("Please complete all Grades and Credits.");
 return;
 }
 
@@ -212,20 +212,16 @@ return;
 
 let semesterGPA=(totalPoints/totalCredits).toFixed(2);
 
-let resultDiv=document.getElementById("result");
-let statsDiv=document.getElementById("stats");
-
 let html=`Semester GPA: <span style="color:${getColor(semesterGPA)}">${semesterGPA}</span>`;
 
 let prevGPA=document.getElementById("prevGPA").value;
 let prevCredits=document.getElementById("prevCredits").value;
 
-if(prevGPA && prevCredits){
+if(prevGPA!=="" && prevCredits!=="" && parseFloat(prevCredits)>0){
 
 let cumulative=
 (
-(parseFloat(prevGPA)*parseFloat(prevCredits)) +
-(totalPoints)
+(parseFloat(prevGPA)*parseFloat(prevCredits)) + totalPoints
 )
 /
 (parseFloat(prevCredits)+totalCredits);
@@ -235,13 +231,14 @@ cumulative=cumulative.toFixed(2);
 html+=`<br>Cumulative GPA: <span style="color:${getColor(cumulative)}">${cumulative}</span>`;
 }
 
+let resultDiv=document.getElementById("result");
 resultDiv.innerHTML=html;
 
 resultDiv.classList.remove("show");
 void resultDiv.offsetWidth;
 resultDiv.classList.add("show");
 
-statsDiv.innerHTML=
+document.getElementById("stats").innerHTML=
 `Total Courses: ${courseCount} | Total Credits: ${totalCredits}`;
 }
 
@@ -253,6 +250,8 @@ function resetAll(){
 coursesDiv.innerHTML="";
 document.getElementById("result").innerHTML="";
 document.getElementById("stats").innerHTML="";
+document.getElementById("prevGPA").value="";
+document.getElementById("prevCredits").value="";
 addUsed=false;
 }
 
