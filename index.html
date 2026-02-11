@@ -37,7 +37,7 @@ body.dark .card{background:var(--dark)}
 
 .course-inputs{
   display:none;
-  flex-direction:row;   /* 🔧 مهم */
+  flex-direction:row;
   gap:10px;
   margin-bottom:12px;
 }
@@ -101,7 +101,6 @@ body.dark .course{background:#1e293b}
 
 <div class="card">
 
-  <!-- Inputs -->
   <div class="course-inputs" id="inputs">
     <select id="grade">
       <option value="">Grade</option>
@@ -133,31 +132,38 @@ body.dark .course{background:#1e293b}
 </div>
 
 <script>
-const points={
- A:4,"A-":3.67,B:3.33,"B-":3,
- C:2.67,"C-":2.33,D:2,F:0
+/* 🔢 Grade Point Table مطابق للصورة */
+const gradeScale = {
+  "A": 4.00,
+  "A-": 3.67,
+  "B": 3.33,
+  "B-": 3.00,
+  "C": 2.67,
+  "C-": 2.33,
+  "D": 2.00,
+  "F": 0.00
 };
 
-let courses=JSON.parse(localStorage.getItem("courses"))||[];
+let courses = JSON.parse(localStorage.getItem("courses")) || [];
 
 function showInputs(){
  document.getElementById("inputs").style.display="flex";
 }
 
 function saveCourse(){
- const g=document.getElementById("grade");
- const h=document.getElementById("hours");
+ const grade=document.getElementById("grade").value;
+ const hours=Number(document.getElementById("hours").value);
 
- if(!g.value||!h.value){
+ if(!grade || !hours){
    alert("Please select grade and hours");
    return;
  }
 
- courses.push({grade:g.value,hours:+h.value});
+ courses.push({grade, hours});
  localStorage.setItem("courses",JSON.stringify(courses));
 
- g.value="";
- h.value="";
+ document.getElementById("grade").value="";
+ document.getElementById("hours").value="";
 
  renderCourses();
 }
@@ -180,14 +186,26 @@ function removeCourse(i){
  renderCourses();
 }
 
+/* 🧮 النظام الحسابي الجديد المطابق للصورة */
 function calculateGPA(){
- if(!courses.length){alert("Add courses first");return;}
- let p=0,h=0;
- courses.forEach(c=>{
-  p+=points[c.grade]*c.hours;
-  h+=c.hours;
+ if(!courses.length){
+   alert("Add courses first");
+   return;
+ }
+
+ let totalQualityPoints = 0;
+ let totalCreditHours = 0;
+
+ courses.forEach(course=>{
+   const gradePoint = gradeScale[course.grade];
+   const qualityPoints = gradePoint * course.hours;
+
+   totalQualityPoints += qualityPoints;
+   totalCreditHours += course.hours;
  });
- let gpa=(p/h).toFixed(2);
+
+ const gpa = (totalQualityPoints / totalCreditHours).toFixed(2);
+
  const r=document.getElementById("result");
  r.style.display="block";
  r.className="result "+(gpa>=3?"good":gpa>=2?"mid":"bad");
@@ -196,7 +214,7 @@ function calculateGPA(){
 
 function resetAll(){
  courses=[];
- localStorage.clear();
+ localStorage.removeItem("courses");
  document.getElementById("courses").innerHTML="";
  document.getElementById("inputs").style.display="none";
  document.getElementById("result").style.display="none";
