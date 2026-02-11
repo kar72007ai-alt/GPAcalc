@@ -1,26 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GPA Calculator</title>
 
 <style>
 body {
-    font-family: Arial, sans-serif;
-    background: #f3f6fb;
-    margin: 0;
-    padding: 30px;
-    transition: 0.3s;
+    font-family: Arial;
+    background: #eef1f6;
+    padding: 40px;
+    transition: .3s;
 }
 
 .dark-mode {
-    background: #1e293b;
+    background: #0f172a;
     color: white;
 }
 
 .container {
-    max-width: 700px;
+    max-width: 900px;
     margin: auto;
     text-align: center;
 }
@@ -29,90 +27,75 @@ body {
 .top-buttons {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
 button {
     border: none;
-    padding: 12px 18px;
-    font-size: 15px;
-    border-radius: 18px;
+    padding: 15px 28px;
+    font-size: 16px;
+    border-radius: 40px;
     cursor: pointer;
-    transition: 0.3s;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
     font-weight: bold;
+    transition: .3s;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.1);
 }
 
-button:hover {
-    transform: scale(1.05);
-}
+button:hover { transform: translateY(-3px); }
 
-/* Colors */
-.add-btn {
-    background-color: #22c55e;
-    color: white;
-}
-
-.save-btn {
-    background-color: #3b82f6;
-    color: white;
-}
-
-.reset-btn {
-    background-color: #ef4444;
-    color: white;
-}
-
-.dark-btn {
-    background-color: #334155;
-    color: white;
-}
+.dark-btn { background:#334155; color:white; }
+.reset-btn { background:#ef4444; color:white; }
+.add-btn { background:#22c55e; color:white; }
+.save-btn { background:#3b82f6; color:white; }
 
 .calc-btn {
-    background: linear-gradient(45deg, #6366f1, #8b5cf6);
-    color: white;
-    display: block;
-    margin: 30px auto 0;
-    width: 60%;
+    background: linear-gradient(45deg,#6366f1,#8b5cf6);
+    color:white;
+    width:75%;
+    padding:25px;
+    font-size:22px;
+    margin-top:40px;
 }
 
-/* Input Area */
+/* Inputs */
 .input-area {
-    display: none;
-    margin-bottom: 20px;
+    display:none;
+    margin-bottom:25px;
 }
 
-input {
-    padding: 10px;
-    margin: 5px;
-    width: 120px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
+input, select {
+    padding:12px;
+    margin:8px;
+    border-radius:15px;
+    border:1px solid #ccc;
 }
 
 /* Course List */
 .course-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: white;
-    padding: 12px;
-    border-radius: 12px;
-    margin-bottom: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:white;
+    padding:15px 20px;
+    border-radius:20px;
+    margin-bottom:12px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.08);
 }
 
 .dark-mode .course-item {
-    background: #334155;
+    background:#1e293b;
 }
 
 .delete-btn {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
+    background:#ef4444;
+    color:white;
+    border-radius:50%;
+    width:38px;
+    height:38px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
 }
 </style>
 </head>
@@ -121,103 +104,120 @@ input {
 
 <div class="container">
 
-    <!-- Top Buttons -->
-    <div class="top-buttons">
-        <button class="add-btn" onclick="showInputs()">➕ Add</button>
-        <button class="reset-btn" onclick="resetAll()">🔄 Reset</button>
-        <button class="dark-btn" onclick="toggleDark()">🌙 Dark</button>
-        <button class="save-btn" onclick="saveCourse()">✔ Save</button>
-    </div>
+<!-- ORDER: Dark - Reset - Add - Save -->
+<div class="top-buttons">
+    <button class="dark-btn" onclick="toggleDark()">🌙 Dark</button>
+    <button class="reset-btn" onclick="resetAll()">🔄 Reset</button>
+    <button class="add-btn" onclick="showInputs()">➕ Add</button>
+    <button class="save-btn" onclick="saveCourse()">✔ Save</button>
+</div>
 
-    <!-- Hidden Inputs -->
-    <div class="input-area" id="inputArea">
-        <input type="text" id="courseName" placeholder="Course Name">
-        <input type="number" id="courseGrade" placeholder="Grade (0-4)" step="0.01">
-        <input type="number" id="courseCredits" placeholder="Credits">
-    </div>
+<div class="input-area" id="inputArea">
+    <input type="text" id="courseName" placeholder="Course Name (Optional)">
+    
+    <select id="courseGrade">
+        <option value="">Select Grade</option>
+        <option value="4">A</option>
+        <option value="3.67">A-</option>
+        <option value="3.33">B</option>
+        <option value="3">B-</option>
+        <option value="2.67">C</option>
+        <option value="2.33">C-</option>
+        <option value="2">D</option>
+        <option value="0">F</option>
+    </select>
 
-    <div id="courseList"></div>
+    <select id="courseCredits">
+        <option value="">Credits</option>
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+        <option>5</option>
+        <option>6</option>
+    </select>
+</div>
 
-    <!-- Calculate -->
-    <button class="calc-btn" onclick="calculateGPA()">📊 Calculate GPA</button>
+<div id="courseList"></div>
 
-    <h2 id="result"></h2>
+<button class="calc-btn" onclick="calculateGPA()">📊 Calculate GPA</button>
+
+<h2 id="result"></h2>
 
 </div>
 
 <script>
-let courses = [];
-let inputsShown = false;
+let courses=[];
+let shown=false;
 
-function showInputs() {
-    if (!inputsShown) {
-        document.getElementById("inputArea").style.display = "block";
-        inputsShown = true;
+function showInputs(){
+    if(!shown){
+        document.getElementById("inputArea").style.display="block";
+        shown=true;
     }
 }
 
-function saveCourse() {
-    const name = document.getElementById("courseName").value;
-    const grade = parseFloat(document.getElementById("courseGrade").value);
-    const credits = parseFloat(document.getElementById("courseCredits").value);
+function saveCourse(){
+    const name=document.getElementById("courseName").value||"Unnamed";
+    const grade=parseFloat(document.getElementById("courseGrade").value);
+    const credits=parseFloat(document.getElementById("courseCredits").value);
 
-    if (!name || isNaN(grade) || isNaN(credits)) {
-        alert("Please fill all fields correctly");
+    if(isNaN(grade)||isNaN(credits)){
+        alert("Select Grade and Credits");
         return;
     }
 
-    courses.push({ name, grade, credits });
+    courses.push({name,grade,credits});
     displayCourses();
 
-    document.getElementById("courseName").value = "";
-    document.getElementById("courseGrade").value = "";
-    document.getElementById("courseCredits").value = "";
+    document.getElementById("courseName").value="";
+    document.getElementById("courseGrade").value="";
+    document.getElementById("courseCredits").value="";
 }
 
-function deleteCourse(index) {
-    courses.splice(index, 1);
-    displayCourses();
-}
+function displayCourses(){
+    const list=document.getElementById("courseList");
+    list.innerHTML="";
 
-function displayCourses() {
-    const list = document.getElementById("courseList");
-    list.innerHTML = "";
-
-    courses.forEach((course, index) => {
-        list.innerHTML += `
-            <div class="course-item">
-                ${course.name} | Grade: ${course.grade} | Credits: ${course.credits}
-                <button class="delete-btn" onclick="deleteCourse(${index})">🗑️</button>
-            </div>
-        `;
+    courses.forEach((c,i)=>{
+        list.innerHTML+=`
+        <div class="course-item">
+            ${c.name} | ${c.grade} × ${c.credits}
+            <div class="delete-btn" onclick="deleteCourse(${i})">🗑</div>
+        </div>`;
     });
 }
 
-function calculateGPA() {
-    let totalPoints = 0;
-    let totalCredits = 0;
+function deleteCourse(i){
+    courses.splice(i,1);
+    displayCourses();
+}
 
-    courses.forEach(course => {
-        totalPoints += course.grade * course.credits;
-        totalCredits += course.credits;
+function calculateGPA(){
+    let totalPoints=0;
+    let totalCredits=0;
+
+    courses.forEach(c=>{
+        totalPoints+=c.grade*c.credits;
+        totalCredits+=c.credits;
     });
 
-    if (totalCredits === 0) {
-        alert("Add courses first!");
+    if(totalCredits===0){
+        alert("Add courses first");
         return;
     }
 
-    const gpa = (totalPoints / totalCredits).toFixed(2);
-    document.getElementById("result").innerText = "Your GPA: " + gpa;
+    let gpa=(totalPoints/totalCredits).toFixed(2);
+    document.getElementById("result").innerText="GPA = "+gpa;
 }
 
-function resetAll() {
-    courses = [];
-    document.getElementById("courseList").innerHTML = "";
-    document.getElementById("result").innerText = "";
+function resetAll(){
+    courses=[];
+    document.getElementById("courseList").innerHTML="";
+    document.getElementById("result").innerText="";
 }
 
-function toggleDark() {
+function toggleDark(){
     document.body.classList.toggle("dark-mode");
 }
 </script>
