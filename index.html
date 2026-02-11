@@ -116,14 +116,14 @@ opacity:0.8;
 <div class="stats" id="stats"></div>
 
 <script>
+  
+  function togglePrevious(){
+  let sec = document.getElementById("previousSection");
+  sec.style.display = sec.style.display === "none" ? "block" : "none";
+}
 
 let coursesDiv=document.getElementById("courses");
 let addUsed=false;
-
-function togglePrevious(){
-let sec=document.getElementById("previousSection");
-sec.style.display = sec.style.display==="none" ? "block" : "none";
-}
 
 function createRow(){
 let row=document.createElement("div");
