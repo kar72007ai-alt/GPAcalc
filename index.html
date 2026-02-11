@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GPA Calculator</title>
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#6366f1">
-
 <style>
 body{
 font-family:Arial, sans-serif;
@@ -39,15 +36,13 @@ cursor:pointer;
 transition:0.3s;
 }
 
-button:hover{
-transform:scale(1.05);
-}
+button:hover{ transform:scale(1.05); }
 
-.app-btn{background:#6366f1;color:white;}
 .dark-btn{background:#2f3b52;color:white;}
 .reset-btn{background:#ef4444;color:white;}
 .add-btn{background:#22c55e;color:white;}
 .save-btn{background:#3b82f6;color:white;}
+.prev-btn{background:#8b5cf6;color:white;}
 
 .row{
 display:flex;
@@ -65,35 +60,7 @@ border:1px solid #ccc;
 font-size:14px;
 }
 
-.row input{
-width:100px;
-}
-
-.trash{
-background:#ef4444;
-color:white;
-border-radius:50%;
-width:32px;
-height:32px;
-display:flex;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-font-size:14px;
-}
-
-.edit-btn{
-background:#f59e0b;
-color:white;
-border-radius:50%;
-width:32px;
-height:32px;
-display:flex;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-font-size:14px;
-}
+.row input{ width:100px; }
 
 .calculate{
 margin-top:40px;
@@ -129,11 +96,16 @@ opacity:0.8;
 <body>
 
 <div class="top-buttons">
-<button class="app-btn" id="installBtn" style="display:none;">📲 App</button>
 <button class="dark-btn" onclick="toggleDark()">🌙 Dark</button>
 <button class="reset-btn" onclick="resetAll()">🔄 Reset</button>
 <button class="add-btn" onclick="addCourse()">➕ Add</button>
 <button class="save-btn" onclick="saveCourse()">✔ Save</button>
+<button class="prev-btn" onclick="togglePrevious()">➕ Add Previous GPA</button>
+</div>
+
+<div id="previousSection" style="display:none;margin-bottom:20px;">
+<input type="number" id="prevGPA" placeholder="Previous GPA" step="0.01">
+<input type="number" id="prevCredits" placeholder="Previous Credits">
 </div>
 
 <div id="courses"></div>
@@ -145,38 +117,16 @@ opacity:0.8;
 
 <script>
 
-let coursesDiv = document.getElementById("courses");
-let addUsed = false;
-let deferredPrompt;
+let coursesDiv=document.getElementById("courses");
+let addUsed=false;
 
-// ===== PWA INSTALL BUTTON =====
-const installBtn = document.getElementById("installBtn");
-
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  installBtn.style.display = "inline-block";
-});
-
-installBtn.addEventListener("click", async () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt = null;
-    installBtn.style.display = "none";
-  } else {
-    alert("On iPhone: Share → Add to Home Screen");
-  }
-});
-
-// ===== SERVICE WORKER =====
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
+function togglePrevious(){
+let sec=document.getElementById("previousSection");
+sec.style.display=sec.style.display==="none"?"block":"none";
 }
 
-// ===== GPA LOGIC =====
-
 function createRow(){
-let row = document.createElement("div");
+let row=document.createElement("div");
 row.className="row editing";
 
 row.innerHTML=`
@@ -201,7 +151,7 @@ row.innerHTML=`
 <option value="5">5</option>
 <option value="6">6</option>
 </select>
-<div class="trash" onclick="this.parentElement.remove()">🗑</div>
+<div style="cursor:pointer" onclick="this.parentElement.remove()">🗑</div>
 `;
 
 coursesDiv.appendChild(row);
@@ -210,31 +160,29 @@ coursesDiv.appendChild(row);
 function addCourse(){
 if(!addUsed){
 createRow();
-addUsed = true;
+addUsed=true;
 }
 }
 
 function saveCourse(){
-let editingRow = document.querySelector(".editing");
-if(!editingRow) return;
+let editing=document.querySelector(".editing");
+if(!editing) return;
 
-editingRow.classList.remove("editing");
-editingRow.querySelectorAll("input,select").forEach(el=>el.disabled=true);
-
-let editBtn = document.createElement("div");
-editBtn.className="edit-btn";
-editBtn.innerHTML="✏";
-editBtn.onclick=function(){
-editingRow.querySelectorAll("input,select").forEach(el=>el.disabled=false);
-editingRow.classList.add("editing");
-editBtn.remove();
-};
-editingRow.appendChild(editBtn);
-
+editing.classList.remove("editing");
+editing.querySelectorAll("input,select").forEach(el=>el.disabled=true);
 createRow();
 }
 
+function getColor(gpa){
+gpa=parseFloat(gpa);
+if(gpa>=3.5) return "#22c55e";
+if(gpa>=3) return "#3b82f6";
+if(gpa>=2) return "#f59e0b";
+return "#ef4444";
+}
+
 function calculateGPA(){
+
 let rows=document.querySelectorAll(".row");
 let totalPoints=0;
 let totalCredits=0;
@@ -245,7 +193,7 @@ let selects=row.querySelectorAll("select");
 if(selects.length<2) continue;
 
 if(selects[0].value==="" || selects[1].value===""){
-alert("Please complete all Grades and Credits before calculating.");
+alert("Complete all Grades and Credits.");
 return;
 }
 
@@ -262,14 +210,38 @@ alert("No courses added.");
 return;
 }
 
-let gpa=(totalPoints/totalCredits).toFixed(2);
+let semesterGPA=(totalPoints/totalCredits).toFixed(2);
+
 let resultDiv=document.getElementById("result");
-resultDiv.innerHTML=`GPA: ${gpa}`;
+let statsDiv=document.getElementById("stats");
+
+let html=`Semester GPA: <span style="color:${getColor(semesterGPA)}">${semesterGPA}</span>`;
+
+let prevGPA=document.getElementById("prevGPA").value;
+let prevCredits=document.getElementById("prevCredits").value;
+
+if(prevGPA && prevCredits){
+
+let cumulative=
+(
+(parseFloat(prevGPA)*parseFloat(prevCredits)) +
+(totalPoints)
+)
+/
+(parseFloat(prevCredits)+totalCredits);
+
+cumulative=cumulative.toFixed(2);
+
+html+=`<br>Cumulative GPA: <span style="color:${getColor(cumulative)}">${cumulative}</span>`;
+}
+
+resultDiv.innerHTML=html;
+
 resultDiv.classList.remove("show");
 void resultDiv.offsetWidth;
 resultDiv.classList.add("show");
 
-document.getElementById("stats").innerHTML=
+statsDiv.innerHTML=
 `Total Courses: ${courseCount} | Total Credits: ${totalCredits}`;
 }
 
@@ -279,8 +251,8 @@ document.body.classList.toggle("dark");
 
 function resetAll(){
 coursesDiv.innerHTML="";
-document.getElementById("result").innerText="";
-document.getElementById("stats").innerText="";
+document.getElementById("result").innerHTML="";
+document.getElementById("stats").innerHTML="";
 addUsed=false;
 }
 
