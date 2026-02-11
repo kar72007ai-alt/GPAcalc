@@ -79,8 +79,8 @@ cursor:pointer;
 
 .calculate{
 margin-top:50px;
-padding:22px 70px;
-font-size:24px;
+padding:25px 90px;
+font-size:26px;
 border-radius:50px;
 background:linear-gradient(90deg,#6366f1,#8b5cf6);
 color:white;
@@ -100,7 +100,7 @@ font-weight:bold;
 <button class="dark-btn" onclick="toggleDark()">🌙 Dark</button>
 <button class="reset-btn" onclick="resetAll()">🔄 Reset</button>
 <button class="add-btn" onclick="addCourse()">➕ Add</button>
-<button class="save-btn" onclick="saveData()">✔ Save</button>
+<button class="save-btn" onclick="saveCourse()">✔ Save</button>
 </div>
 
 <div id="courses"></div>
@@ -112,19 +112,24 @@ font-weight:bold;
 <script>
 
 let coursesDiv = document.getElementById("courses");
+let addUsed = false;
 
+// إنشاء صف مادة
 function createRow(){
 let row = document.createElement("div");
-row.className="row";
+row.className="row editing";
 
 row.innerHTML=`
 <input type="text" placeholder="Course Name (Optional)">
 <span class="label">Grades</span>
 <select>
 <option value="4">A</option>
-<option value="3">B</option>
-<option value="2">C</option>
-<option value="1">D</option>
+<option value="3.67">A-</option>
+<option value="3.33">B</option>
+<option value="3">B-</option>
+<option value="2.67">C</option>
+<option value="2.33">C-</option>
+<option value="2">D</option>
 <option value="0">F</option>
 </select>
 <span class="label">Credits</span>
@@ -142,21 +147,45 @@ row.innerHTML=`
 coursesDiv.appendChild(row);
 }
 
+// زر Add (مرة واحدة فقط)
 function addCourse(){
+if(!addUsed){
+createRow();
+addUsed = true;
+}
+}
+
+// زر Save
+function saveCourse(){
+let editingRow = document.querySelector(".editing");
+if(!editingRow) return;
+
+editingRow.classList.remove("editing");
+
+// تعطيل التعديل بعد الحفظ
+editingRow.querySelectorAll("input,select").forEach(el=>{
+el.disabled = true;
+});
+
+// فتح مادة جديدة تلقائي
 createRow();
 }
 
+// حساب GPA
 function calculateGPA(){
 let rows=document.querySelectorAll(".row");
 let totalPoints=0;
 let totalCredits=0;
 
 rows.forEach(row=>{
-let grade=row.querySelectorAll("select")[0].value;
-let credits=row.querySelectorAll("select")[1].value;
+let selects=row.querySelectorAll("select");
+if(selects.length<2) return;
+
+let grade=parseFloat(selects[0].value);
+let credits=parseInt(selects[1].value);
 
 totalPoints+=grade*credits;
-totalCredits+=parseInt(credits);
+totalCredits+=credits;
 });
 
 if(totalCredits===0){
@@ -165,42 +194,39 @@ return;
 }
 
 let gpa=(totalPoints/totalCredits).toFixed(2);
+let numericGPA=parseFloat(gpa);
 
 let letter="";
-if(gpa>=3.7) letter="A";
-else if(gpa>=3) letter="B";
-else if(gpa>=2) letter="C";
-else if(gpa>=1) letter="D";
+if(numericGPA >= 3.7 && numericGPA <= 4) letter="A";
+else if(numericGPA >= 3.33) letter="A-";
+else if(numericGPA >= 3) letter="B";
+else if(numericGPA >= 2.67) letter="B-";
+else if(numericGPA >= 2.33) letter="C";
+else if(numericGPA >= 2) letter="C-";
+else if(numericGPA >= 1) letter="D";
 else letter="F";
 
 let resultDiv=document.getElementById("result");
 resultDiv.innerHTML=`GPA: ${gpa} (${letter})`;
 
-if(gpa>=3.5) resultDiv.style.color="green";
-else if(gpa>=2) resultDiv.style.color="orange";
+// تلوين حسب المستوى
+if(numericGPA>=3.7) resultDiv.style.color="green";
+else if(numericGPA>=2.33) resultDiv.style.color="orange";
 else resultDiv.style.color="red";
 }
 
+// Dark Mode
 function toggleDark(){
 document.body.classList.toggle("dark");
 }
 
+// Reset
 function resetAll(){
 coursesDiv.innerHTML="";
 document.getElementById("result").innerText="";
+addUsed=false;
 }
 
-function saveData(){
-localStorage.setItem("savedCourses",coursesDiv.innerHTML);
-alert("Saved successfully");
-}
-
-window.onload=function(){
-let saved=localStorage.getItem("savedCourses");
-if(saved){
-coursesDiv.innerHTML=saved;
-}
-}
 </script>
 
 </body>
