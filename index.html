@@ -98,7 +98,7 @@ opacity:0.8;
 <div class="top-buttons">
 <button class="dark-btn" onclick="toggleDark()">🌙 Dark</button>
 <button class="reset-btn" onclick="resetAll()">🔄 Reset</button>
-<button class="add-btn" onclick="addCourse()">➕ Add</button>
+<button class="add-btn" onclick="createRow()">➕ Add</button>
 <button class="save-btn" onclick="saveCourse()">✔ Save</button>
 <button class="prev-btn" onclick="togglePrevious()">➕ Add Previous GPA</button>
 </div>
@@ -117,15 +117,18 @@ opacity:0.8;
 
 <script>
 
+let coursesDiv=document.getElementById("courses");
+
 function togglePrevious(){
 let sec=document.getElementById("previousSection");
 sec.style.display = sec.style.display==="none" ? "block" : "none";
 }
 
-let coursesDiv=document.getElementById("courses");
-let addUsed=false;
-
 function createRow(){
+
+// لو فيه صف تعديل بالفعل متعملش واحد جديد
+if(document.querySelector(".editing")) return;
+
 let row=document.createElement("div");
 row.className="row editing";
 
@@ -138,8 +141,8 @@ row.innerHTML=`
 <option value="3.33">B+</option>
 <option value="3">B</option>
 <option value="2.67">C+</option>
-<option value="2.33">C</option>
-<option value="2">D</option>
+<option value="2">C</option>
+<option value="1">D</option>
 <option value="0">F</option>
 </select>
 <select>
@@ -154,22 +157,27 @@ row.innerHTML=`
 <div style="cursor:pointer" onclick="this.parentElement.remove()">🗑</div>
 `;
 
-coursesDiv.prepend(row);
-}
-
-function addCourse(){
-if(!addUsed){
-createRow();
-addUsed=true;
-}
+coursesDiv.prepend(row); // صف الإدخال دايمًا فوق
 }
 
 function saveCourse(){
 let editing=document.querySelector(".editing");
 if(!editing) return;
 
+let selects=editing.querySelectorAll("select");
+
+if(selects[0].value==="" || selects[1].value===""){
+alert("Please complete Grades and Credits first.");
+return;
+}
+
 editing.classList.remove("editing");
 editing.querySelectorAll("input,select").forEach(el=>el.disabled=true);
+
+// ننزل الصف المحفوظ لتحت
+coursesDiv.appendChild(editing);
+
+// نعمل صف جديد فوق
 createRow();
 }
 
@@ -189,14 +197,10 @@ let totalCredits=0;
 let courseCount=0;
 
 for(let row of rows){
+
+if(row.classList.contains("editing")) continue;
+
 let selects=row.querySelectorAll("select");
-if(selects.length<2) continue;
-
-if(selects[0].value==="" || selects[1].value===""){
-alert("Please complete all Grades and Credits.");
-return;
-}
-
 let grade=parseFloat(selects[0].value);
 let credits=parseInt(selects[1].value);
 
@@ -206,7 +210,7 @@ courseCount++;
 }
 
 if(totalCredits===0){
-alert("No courses added.");
+alert("No saved courses.");
 return;
 }
 
@@ -214,7 +218,6 @@ let semesterGPA=(totalPoints/totalCredits).toFixed(2);
 
 let html=`Semester GPA: <span style="color:${getColor(semesterGPA)}">${semesterGPA}</span>`;
 
-// ===== FIXED CUMULATIVE SECTION =====
 let prevGPA=parseFloat(document.getElementById("prevGPA").value);
 let prevCredits=parseFloat(document.getElementById("prevCredits").value);
 
@@ -228,7 +231,6 @@ cumulative=cumulative.toFixed(2);
 
 html+=`<br>Cumulative GPA: <span style="color:${getColor(cumulative)}">${cumulative}</span>`;
 }
-// =====================================
 
 let resultDiv=document.getElementById("result");
 resultDiv.innerHTML=html;
@@ -251,9 +253,8 @@ document.getElementById("result").innerHTML="";
 document.getElementById("stats").innerHTML="";
 document.getElementById("prevGPA").value="";
 document.getElementById("prevCredits").value="";
-addUsed=false;
 }
-
+  
 </script>
 
 </body>
