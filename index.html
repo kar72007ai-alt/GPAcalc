@@ -154,7 +154,7 @@ row.innerHTML=`
 <div style="cursor:pointer" onclick="this.parentElement.remove()">🗑</div>
 `;
 
-coursesDiv.appendChild(row);
+coursesDiv.prepend(row);
 }
 
 function addCourse(){
