@@ -116,10 +116,10 @@ opacity:0.8;
 <div class="stats" id="stats"></div>
 
 <script>
-  
-  function togglePrevious(){
-  let sec = document.getElementById("previousSection");
-  sec.style.display = sec.style.display === "none" ? "block" : "none";
+
+function togglePrevious(){
+let sec=document.getElementById("previousSection");
+sec.style.display = sec.style.display==="none" ? "block" : "none";
 }
 
 let coursesDiv=document.getElementById("courses");
@@ -214,22 +214,21 @@ let semesterGPA=(totalPoints/totalCredits).toFixed(2);
 
 let html=`Semester GPA: <span style="color:${getColor(semesterGPA)}">${semesterGPA}</span>`;
 
-let prevGPA=document.getElementById("prevGPA").value;
-let prevCredits=document.getElementById("prevCredits").value;
+// ===== FIXED CUMULATIVE SECTION =====
+let prevGPA=parseFloat(document.getElementById("prevGPA").value);
+let prevCredits=parseFloat(document.getElementById("prevCredits").value);
 
-if(prevGPA!=="" && prevCredits!=="" && parseFloat(prevCredits)>0){
+if(!isNaN(prevGPA) && !isNaN(prevCredits) && prevCredits>0){
 
 let cumulative=
-(
-(parseFloat(prevGPA)*parseFloat(prevCredits)) + totalPoints
-)
-/
-(parseFloat(prevCredits)+totalCredits);
+((prevGPA*prevCredits)+totalPoints)/
+(prevCredits+totalCredits);
 
 cumulative=cumulative.toFixed(2);
 
 html+=`<br>Cumulative GPA: <span style="color:${getColor(cumulative)}">${cumulative}</span>`;
 }
+// =====================================
 
 let resultDiv=document.getElementById("result");
 resultDiv.innerHTML=html;
