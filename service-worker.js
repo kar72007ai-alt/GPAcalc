@@ -1,4 +1,4 @@
-const CACHE_NAME = "gpa-production-v1";
+const CACHE_NAME = "gpa-production-v2";
 
 self.addEventListener("install", event => {
 event.waitUntil(
