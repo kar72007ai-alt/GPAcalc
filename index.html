@@ -106,7 +106,8 @@ opacity:0.8;
 <button class="prev-btn" onclick="togglePrevious()">➕ Add Previous GPA</button>
 </div>
 
-<div id="previousSection" style="display:none;margin-bottom:20px;">
+<!-- الخانة دايمًا ظاهرة -->
+<div id="previousSection" style="margin-bottom:20px;">
 <input type="number" id="prevGPA" placeholder="Previous GPA" step="0.01">
 <input type="number" id="prevCredits" placeholder="Previous Credits">
 </div>
@@ -188,7 +189,6 @@ return "#ef4444";
 }
 
 function calculateGPA(){
-
 let rows=document.querySelectorAll(".row");
 let totalQualityPoints=0;
 let totalCredits=0;
@@ -219,7 +219,6 @@ let prevGPA=parseFloat(document.getElementById("prevGPA").value);
 let prevCredits=parseFloat(document.getElementById("prevCredits").value);
 
 if(!isNaN(prevGPA) && !isNaN(prevCredits) && prevCredits>0){
-
 let previousQualityPoints = prevGPA * prevCredits;
 let cumulativeQualityPoints = previousQualityPoints + totalQualityPoints;
 let cumulativeCredits = prevCredits + totalCredits;
@@ -253,6 +252,7 @@ createRow();
 
 createRow();
 
+// تسجيل Service Worker
 if ("serviceWorker" in navigator) {
 window.addEventListener("load", () => {
 navigator.serviceWorker.register("sw.js");
