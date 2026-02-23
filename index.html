@@ -126,7 +126,6 @@ sec.style.display = sec.style.display==="none" ? "block" : "none";
 
 function createRow(){
 
-// لو فيه صف تعديل بالفعل متعملش واحد جديد
 if(document.querySelector(".editing")) return;
 
 let row=document.createElement("div");
@@ -141,8 +140,8 @@ row.innerHTML=`
 <option value="3.33">B+</option>
 <option value="3">B</option>
 <option value="2.67">C+</option>
-<option value="2">C</option>
-<option value="1">D</option>
+<option value="2.33">C-</option>
+<option value="2">D</option>
 <option value="0">F</option>
 </select>
 <select>
@@ -157,7 +156,7 @@ row.innerHTML=`
 <div style="cursor:pointer" onclick="this.parentElement.remove()">🗑</div>
 `;
 
-coursesDiv.prepend(row); // صف الإدخال دايمًا فوق
+coursesDiv.prepend(row);
 }
 
 function saveCourse(){
@@ -174,10 +173,7 @@ return;
 editing.classList.remove("editing");
 editing.querySelectorAll("input,select").forEach(el=>el.disabled=true);
 
-// ننزل الصف المحفوظ لتحت
 coursesDiv.appendChild(editing);
-
-// نعمل صف جديد فوق
 createRow();
 }
 
@@ -192,7 +188,7 @@ return "#ef4444";
 function calculateGPA(){
 
 let rows=document.querySelectorAll(".row");
-let totalPoints=0;
+let totalQualityPoints=0;
 let totalCredits=0;
 let courseCount=0;
 
@@ -202,10 +198,12 @@ if(row.classList.contains("editing")) continue;
 
 let selects=row.querySelectorAll("select");
 let grade=parseFloat(selects[0].value);
-let credits=parseInt(selects[1].value);
+let credits=parseFloat(selects[1].value);
 
-totalPoints+=grade*credits;
-totalCredits+=credits;
+let qualityPoints = grade * credits;
+
+totalQualityPoints += qualityPoints;
+totalCredits += credits;
 courseCount++;
 }
 
@@ -214,7 +212,7 @@ alert("No saved courses.");
 return;
 }
 
-let semesterGPA=(totalPoints/totalCredits).toFixed(2);
+let semesterGPA=(totalQualityPoints/totalCredits).toFixed(2);
 
 let html=`Semester GPA: <span style="color:${getColor(semesterGPA)}">${semesterGPA}</span>`;
 
@@ -223,13 +221,14 @@ let prevCredits=parseFloat(document.getElementById("prevCredits").value);
 
 if(!isNaN(prevGPA) && !isNaN(prevCredits) && prevCredits>0){
 
-let cumulative=
-((prevGPA*prevCredits)+totalPoints)/
-(prevCredits+totalCredits);
+let previousQualityPoints = prevGPA * prevCredits;
 
-cumulative=cumulative.toFixed(2);
+let cumulativeQualityPoints = previousQualityPoints + totalQualityPoints;
+let cumulativeCredits = prevCredits + totalCredits;
 
-html+=`<br>Cumulative GPA: <span style="color:${getColor(cumulative)}">${cumulative}</span>`;
+let cumulativeGPA = (cumulativeQualityPoints / cumulativeCredits).toFixed(2);
+
+html+=`<br>Cumulative GPA: <span style="color:${getColor(cumulativeGPA)}">${cumulativeGPA}</span>`;
 }
 
 let resultDiv=document.getElementById("result");
@@ -254,7 +253,9 @@ document.getElementById("stats").innerHTML="";
 document.getElementById("prevGPA").value="";
 document.getElementById("prevCredits").value="";
 }
-  
+
+createRow();
+
 </script>
 
 </body>
