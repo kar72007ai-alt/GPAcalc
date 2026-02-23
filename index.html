@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GPA Calculator</title>
 
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6366f1">
+
 <style>
 body{
 font-family:Arial, sans-serif;
@@ -125,7 +128,6 @@ sec.style.display = sec.style.display==="none" ? "block" : "none";
 }
 
 function createRow(){
-
 if(document.querySelector(".editing")) return;
 
 let row=document.createElement("div");
@@ -193,16 +195,13 @@ let totalCredits=0;
 let courseCount=0;
 
 for(let row of rows){
-
 if(row.classList.contains("editing")) continue;
 
 let selects=row.querySelectorAll("select");
 let grade=parseFloat(selects[0].value);
 let credits=parseFloat(selects[1].value);
 
-let qualityPoints = grade * credits;
-
-totalQualityPoints += qualityPoints;
+totalQualityPoints += grade * credits;
 totalCredits += credits;
 courseCount++;
 }
@@ -222,10 +221,8 @@ let prevCredits=parseFloat(document.getElementById("prevCredits").value);
 if(!isNaN(prevGPA) && !isNaN(prevCredits) && prevCredits>0){
 
 let previousQualityPoints = prevGPA * prevCredits;
-
 let cumulativeQualityPoints = previousQualityPoints + totalQualityPoints;
 let cumulativeCredits = prevCredits + totalCredits;
-
 let cumulativeGPA = (cumulativeQualityPoints / cumulativeCredits).toFixed(2);
 
 html+=`<br>Cumulative GPA: <span style="color:${getColor(cumulativeGPA)}">${cumulativeGPA}</span>`;
@@ -233,7 +230,6 @@ html+=`<br>Cumulative GPA: <span style="color:${getColor(cumulativeGPA)}">${cumu
 
 let resultDiv=document.getElementById("result");
 resultDiv.innerHTML=html;
-
 resultDiv.classList.remove("show");
 void resultDiv.offsetWidth;
 resultDiv.classList.add("show");
@@ -252,9 +248,16 @@ document.getElementById("result").innerHTML="";
 document.getElementById("stats").innerHTML="";
 document.getElementById("prevGPA").value="";
 document.getElementById("prevCredits").value="";
+createRow();
 }
 
 createRow();
+
+if ("serviceWorker" in navigator) {
+window.addEventListener("load", () => {
+navigator.serviceWorker.register("sw.js");
+});
+}
 
 </script>
 
